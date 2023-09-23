@@ -14,4 +14,4 @@ Open ```index.py``` in your IDE and run the aplication.
 
 ## About
 
-It's a hash game made in python language. The players' score are save in an external ```.txt``` file.
+It's a Tic-Tac-Toe made in python language. The players' score are save in an external ```.txt``` file.
