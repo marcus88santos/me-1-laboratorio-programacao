@@ -1,25 +1,36 @@
 from termcolor import colored
+import random
 
 board = []
 positions = {}
+scores = []
 
-arquivo = 'placar.txt'
+file = 'scores.txt'
 
-def criarArquivo(arquivo):
-	f = open(arquivo,'w')
-	f.write('Jogador'.ljust(20) + 'Vitórias')
+players = ['', '']
+playerMoving = ['']
+symbol = ['X', 'O']
+
+def createFile(file):
+	f = open(file,'w')
+	f.write('JOGADOR'.ljust(20) + 'VITORIAS')
 	f.close()
 
-def verificarDados(arquivo):
-	f = open(arquivo,'r')
+def verifyData(file):
+	f = open(file,'r')
 	tamanho = len(f.read())
+
 	if (tamanho < 20):
 		f.close()
 		raise
+	else:
+		f.seek(0)
+		scores.append(f.readlines())
+		f.close()
 
 def createPositions():
 	for x in range(1, 10):
-		positions[f'p{x}'] = ' '
+		positions[f'p{x}'] = x
 
 def printBoard():
 	board.clear()
@@ -28,40 +39,173 @@ def printBoard():
 			board.append('¡-----'*3 + '¡')
 		elif linha % 2 == 0:
 			temp = ''
-			for i in range(1, 4):
-				temp = temp + (f'|  {positions[f"p{int((linha / 2 - 1)*3 + i)}"]}  ')
-				temp = temp + '|'
+			tempPosit = {2: [1,2,3], 4: [4,5,6], 6: [7,8,9]}
+			for i in tempPosit[linha]:
+				if positions[f'p{i}'] == symbol[0]:
+					color = 'blue'
+				elif positions[f'p{i}'] == symbol[1]:
+					color = 'red'
+				else:
+					color = 'grey'
+				temp = temp + (f'|  ' + colored(f'{positions[f"p{i}"]}', color) + '  ')
+			temp = temp + '|'
 			board.append(temp)
 		elif linha == 7:
 			board.append('!-----'*3 + '!')
 		else:
 			board.append('|-----'*3 + '|')
+	for line in board:
+		print(line)
 
-def checkVictory(board):
-	print(1)
+def checkVictory(player):
+	for n in [1, 4, 7]:
+		if positions[f'p{n}'] == positions[f'p{n+1}'] == positions[f'p{n+2}'] and isinstance(positions[f'p{n}'], str):
+			return True
+	for n in [1, 2, 3]:
+		if positions[f'p{n}'] == positions[f'p{n+3}'] == positions[f'p{n+6}'] and isinstance(positions[f'p{n}'], str):
+			return True
+	if positions[f'p1'] == positions[f'p5'] == positions[f'p9'] and isinstance(positions[f'p1'], str):
+		return True
+	if positions[f'p7'] == positions[f'p5'] == positions[f'p3'] and isinstance(positions[f'p1'], str):
+		return True
+	if player == 1:
+		playerMoving[0] = 2
+	else:
+		playerMoving[0] = 1
+	return False
 
-def updateBoard(posicao, symbol):
+def updateBoard(move, player):
+	
+	positions[f'p{move}'] = symbol[player-1]
+
+def initialMenu():
+	
+	while True:
+		print(colored('\n-> JOGO DA VELHA <-\n', 'red'))
+		print(colored('-> Escolha uma opção:'))
+		print(colored('-> 1 - ', 'blue') + 'Escolher jogadores')
+		print(colored('-> 2 - ', 'blue') + 'Consultar o ranking de vitórias')
+		print(colored('-> 0 - ', 'blue') + 'Sair')
+		opcao = int(input(colored('\n-> ', 'green')))
+		if opcao == 1:
+			choosePlayers()
+			break
+		elif opcao == 2:
+			printScores()
+		elif opcao == 0:
+			print(colored('\n-> O app foi finalizado...\n','red'))
+			exit()
+
+def choosePlayers():
+	print('\n-> Digite o nome do jogador 1:')
+	players[0] = str(input(colored('-> ','green')))
+	
+	while True:
+		print('\n-> Digite o nome do jogador 2:')
+		players[1] = str(input(colored('-> ','green')))
+		if players[1] != players[0]:
+			break
+	
+	while True:
+		print('\n-> Escolha uma opção:')
+		print(colored('-> 1 - ','blue') + 'O jogador 1 começa')
+		print(colored('-> 2 - ','blue') + 'O jogador 2 começa')
+		print(colored('-> 0 - ','blue') + 'Escolha aleatória')
+		opcao = int(input(colored('\n-> ', 'green')))
+		print('')
+		if opcao == 1:
+			playerMoving[0] = 1
+			break
+		elif opcao == 2:
+			playerMoving[0] = 2
+			break
+		elif opcao == 0:
+			playerMoving[0] = random.randint(1,2)
+			break
+
+def printScores():
 	print('')
+	print(scores[0])
+	input('\n-> Pressione {Enter} para continuar...')
+
+def playAgain():
+	while True:
+		print('\n-> Escolha uma opção:')
+		print(colored('-> 1 - ', 'blue') + 'Jogar novamente')
+		print(colored('-> 2 - ', 'blue') + 'Redefinir nome, jogador inicial ou consultar ranking')
+		print(colored('-> 0 - ', 'blue') + 'Sair')
+		opcao = int(input(colored('-> ', 'green')))
+		print('')
+		if 0 <= opcao <= 2:
+			return opcao
+	
+def updateScores(player, scores):
+	newScore = {}
+	scores = scores[0]
+	for i, linha in enumerate(scores):
+		if i > 0:
+			temp = linha.replace('\n', '')
+			temp = temp.replace(' ', ';', 1)
+			temp = temp.replace(' ', '')
+			temp = temp.split(';')
+			newScore[temp[0]] = int(temp[1])
+	
+	newScore = dict(sorted(newScore.items(), key=lambda item: item[1], reverse=True))
+
+	vitorias = int(newScore.get(players[player-1]) or 0) + 1
+	
+	newScore[players[player-1]] = vitorias
+
+	f = open('scores.txt', 'w')
+	f.write('JOGADOR'.ljust(20) + 'VITORIAS')
+
+	for key in newScore:
+		f.write('\n' + str(key).ljust(20) + str(newScore[key]).rjust(8))
+
+		if playerMoving[0] == 1:
+			color = 'blue'
+		else:
+			color = 'red'
+	print('\n-> PARABÉNS, ' + colored(f'{players[player-1]}', color) + '!!!')
+	print('-> Você possui ' + colored(f'{vitorias}', 'red') + ' vitória(s)!')
+
 
 try:
-	verificarDados(arquivo)
-
+	verifyData(file)
 except:
-	criarArquivo(arquivo)
+	createFile(file)
 
-createPositions()
+initialMenu()
 
-print(colored('\n-> JOGO DA VELHA', 'red'))
-print(colored('-> Escolha uma opção:'))
-print(colored('-> 1 - ', 'blue'))
+while True:
 
-printBoard()
+	createPositions()
 
+	while True:
+		printBoard()
+		if checkVictory(playerMoving[0]):
+			break
+		
+		if playerMoving[0] == 1:
+			color = 'blue'
+		else:
+			color = 'red'
 
-positions['p1'] = 'X'
+		while True:
+			print(f'-> É a vez de ' + colored(f'{players[playerMoving[0]-1]}', color) + '. Escolha uma posição vazia para jogar (1-9):')
+			move = input(colored('-> ', 'green'))
+			move = int(move)
+			print('')
+			if 1 <= move <= 9 and isinstance(positions[f'p{move}'], int) :
+				break
 
-positions['p9'] = 'O'
+		updateBoard(move, playerMoving[0])
 
-# updateBoard(posicao, symbol)
+	updateScores(playerMoving[0], scores)
 
-printBoard()
+	newGame = playAgain()
+	if newGame == 0:
+		print(colored('\n-> O app foi finalizado...\n','red'))
+		exit()
+	elif newGame == 2:
+		initialMenu()

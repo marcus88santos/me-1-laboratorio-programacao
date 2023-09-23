@@ -1,0 +1,6 @@
+JOGADOR             VITORIAS
+ast                       25
+asv                       24
+Ttes                      22
+b                          3
+bb                         1
