@@ -1,5 +1,6 @@
-from termcolor import colored
 import random
+import sys
+from termcolor import colored
 
 board = []
 positions = {}
