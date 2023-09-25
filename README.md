@@ -6,6 +6,10 @@ Clone the project:
 
 ```bash
  $ git clone https://github.com/marcus88santos/program-lab-me-1.git
+ $
+ $ cd program-lab-me-1
+ $
+ $ pip install -r requirements.txt
 ```
 
 Open ```index.py``` in your IDE and run the aplication.
