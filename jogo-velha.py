@@ -1,5 +1,5 @@
-import random
 import sys
+import random
 from termcolor import colored
 
 board = []
@@ -35,13 +35,13 @@ def createPositions():
 
 def printBoard():
 	board.clear()
-	for linha in range(1,8):
-		if linha == 1:
+	for line in range(1,8):
+		if line == 1:
 			board.append('¡-----'*3 + '¡')
-		elif linha % 2 == 0:
+		elif line % 2 == 0:
 			temp = ''
 			tempPosit = {2: [1,2,3], 4: [4,5,6], 6: [7,8,9]}
-			for i in tempPosit[linha]:
+			for i in tempPosit[line]:
 				if positions[f'p{i}'] == symbol[0]:
 					color = 'blue'
 				elif positions[f'p{i}'] == symbol[1]:
@@ -51,7 +51,7 @@ def printBoard():
 				temp = temp + (f'|  ' + colored(f'{positions[f"p{i}"]}', color) + '  ')
 			temp = temp + '|'
 			board.append(temp)
-		elif linha == 7:
+		elif line == 7:
 			board.append('!-----'*3 + '!')
 		else:
 			board.append('|-----'*3 + '|')
@@ -126,7 +126,18 @@ def choosePlayers():
 
 def printScores():
 	print('')
-	print(scores[0])
+	tempScore = {}
+	for i, line in enumerate(scores[0]):
+		if i > 0:
+			temp = line.replace('\n', '')
+			temp = temp.replace(' ', ';', 1)
+			temp = temp.replace(' ', '')
+			temp = temp.split(';')
+			tempScore[temp[0]] = int(temp[1])
+	tempScore = dict(sorted(tempScore.items(), key=lambda item: item[1], reverse=True))
+	print(colored('JOGADOR'.ljust(20) + 'VITORIAS'.rjust(8), 'yellow'))
+	for key in tempScore:
+		print(key.ljust(20) + str(tempScore[key]).rjust(8))
 	input('\n-> Pressione {Enter} para continuar...')
 
 def playAgain():
@@ -143,9 +154,9 @@ def playAgain():
 def updateScores(player, scores):
 	newScore = {}
 	scores = scores[0]
-	for i, linha in enumerate(scores):
+	for i, line in enumerate(scores):
 		if i > 0:
-			temp = linha.replace('\n', '')
+			temp = line.replace('\n', '')
 			temp = temp.replace(' ', ';', 1)
 			temp = temp.replace(' ', '')
 			temp = temp.split(';')
